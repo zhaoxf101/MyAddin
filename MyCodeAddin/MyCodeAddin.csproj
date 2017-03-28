@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30424</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{54C786E5-FD14-4036-92AE-E9F25B71534B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <StartupObject>
+    </StartupObject>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>MyCodeAddin</AssemblyName>
+    <DeploymentDirectory>.\bin\</DeploymentDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <OutputPath>.\bin\Debug\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <IncrementalBuild>false</IncrementalBuild>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <OutputPath>.\bin\Release\</OutputPath>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+    <IncrementalBuild>false</IncrementalBuild>
+    <DocumentationFile>MyCodeAddin.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>MyCodeAddin</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Extensibility, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="T4Attribute">
+      <HintPath>..\ClassLibrary1\bin\Debug\T4Attribute.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Column.cs" />
+    <Compile Include="Connect.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConnectDB.cs" />
+    <Compile Include="ConsoleCode.cs" />
+    <Compile Include="DynamicCompiling.cs" />
+    <Compile Include="EditRead\EditReadObject.cs">
+      <DependentUpon>EditReadObject.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Include="EditRead\EditReadObjectCode.cs" />
+    <Compile Include="EditRead\EditReadObjectFactory.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EditReadObjectFactory.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EditRead\EditReadObjectFactoryCode.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Generate.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuList.cs" />
+    <Compile Include="ReadOnly\ReadOnlyObject.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ReadOnlyObject.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ReadOnly\ReadOnlyObjectCode.cs" />
+    <Compile Include="ReadOnly\ReadOnlyObjectFactory.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ReadOnlyObjectFactory.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ReadOnly\ReadOnlyObjectFactoryCode.cs" />
+    <Compile Include="ReadOnly\ReadOnlyObjectsCode.cs" />
+    <Compile Include="ReadOnly\ReadOnlyObjectsFactoryCode.cs" />
+    <Compile Include="SqlHelper.cs" />
+    <Compile Include="TextTemplate1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TextTemplate1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="TextTemplate2.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TextTemplate2.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="EnvDTE">
+      <Guid>{80CC9F66-E7D8-4DDD-85B6-D9E6CD0E93E2}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE100">
+      <Guid>{26AD1324-4B7C-44BC-84F8-B86AED45729F}</Guid>
+      <VersionMajor>10</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE80">
+      <Guid>{1A31287A-4D7D-413E-8E32-3B374931BD89}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE90">
+      <Guid>{2CE2370E-D744-4936-A090-3FFFE667B0E1}</Guid>
+      <VersionMajor>9</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.VisualStudio.CommandBars">
+      <Guid>{1CBA492E-7263-47BB-87FE-639000619B15}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="C:\Users\Administrator\Documents\Visual Studio 2012\Addins\MyCodeAddin - For Testing.AddIn">
+      <Link>MyCodeAddin - For Testing.AddIn</Link>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="MyCodeAddin.AddIn" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="EditRead\EditReadObject.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EditReadObject.cs</LastGenOutput>
+    </None>
+    <None Include="EditRead\EditReadObjectFactory.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EditReadObjectFactory.cs</LastGenOutput>
+    </None>
+    <None Include="ReadOnly\ReadOnlyObject.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ReadOnlyObject.cs</LastGenOutput>
+    </None>
+    <None Include="ReadOnly\ReadOnlyObjectFactory.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ReadOnlyObjectFactory.cs</LastGenOutput>
+    </None>
+    <None Include="TextTemplate1.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>TextTemplate1.cs</LastGenOutput>
+    </None>
+    <None Include="TextTemplate2.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>TextTemplate2.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeBusiness\" />
+    <Folder Include="CodeDalFactory\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <ProjectExtensions />
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <AllOutputFiles Include="$(OutputPath)*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AllOutputFiles)" DestinationFiles="@(AllOutputFiles->'$(DeploymentDirectory)\%(Filename)%(Extension)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+</Project>

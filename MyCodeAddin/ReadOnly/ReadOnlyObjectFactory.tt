@@ -1,0 +1,110 @@
+﻿<#@ template language="C#" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using EF;
+using EF.Data;
+using EF.Linq;
+using EF.Server;
+using EFramework.DalLinq;
+
+namespace <#= DalNameSpace #>
+{
+	public class <#= ClassName #>Factory:<#= BusNameSpace #>.<#= ClassName #>
+    {
+        public static <#= BusNameSpace #>.<#= ClassName #> Fetch(<#= TableName #> data)
+        {
+            <#= BusNameSpace #>.<#= ClassName #> item = (<#= BusNameSpace #>.<#= ClassName #>)Activator.CreateInstance(typeof(<#= BusNameSpace #>.<#= ClassName #>));
+            //using (ObjectFactory.BypassPropertyChecks(item))
+            {
+				<#foreach(var item in Items)
+				{#>
+                item.<#= item.Name #> = data.<#= item.Name #>;
+				<#}#>
+			}
+			ObjectFactory.MarkAsChild(item);
+            ObjectFactory.MarkOld(item);
+            return item;
+        }
+
+		private void DataPortal_Fetch(<#= BusNameSpace #>.LambdaExpression lambda)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+				var exp = lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select p).FirstOrDefault();
+                if (i != null)
+                {
+					<#foreach(var item in Items)
+					{#>
+					this.<#= item.Name #> = i.<#= item.Name #>;
+					<#}#>}
+            }
+        }
+	}
+
+	public class <#= ClassName #>sFactory : <#= BusNameSpace #>.<#= ClassName #>s
+    {
+        private void DataPortal_Fetch()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p);
+                this.RaiseListChangedEvents = false;
+                this.IsReadOnly = false;
+                this.AddRange(i);
+                this.IsReadOnly = true;
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		private void DataPortal_Fetch(Paging page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = (from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.IsReadOnly = false;
+                this.AddRange(i);
+                this.IsReadOnly = true;
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+        private void DataPortal_Fetch(PagigExpress page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var exp = page.Lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.IsReadOnly = false;
+                this.AddRange(i);
+                this.IsReadOnly = true;
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		private void DataPortal_Fetch(<#= BusNameSpace #>.LambdaExpression lambda)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var exp = lambda.Resolve<<#= TableName #>>();
+                var i = from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select <#= ClassName #>Factory.Fetch(p);
+                this.RaiseListChangedEvents = false;
+                this.IsReadOnly = false;
+                this.AddRange(i);
+                this.IsReadOnly = true;
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+
+    }
+}

@@ -1,0 +1,130 @@
+﻿<#@ template language="C#" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using EF.Server;
+using EF;
+
+namespace <#= BusNameSpace #>
+{
+
+	[Serializable]
+    [<#=Factory#>(typeof(<#= ClassName #>))]
+#if Dev
+    [RunLocal]
+#endif
+
+	public class <#= ClassName #>:ReadOnlyBase<<#= ClassName #>>
+    {
+        #region Business Methods
+
+		<# foreach(var item in Items)
+		{
+		 #>
+
+        public <#= item.Type #> <#= item.Name #>
+        {
+            get ;
+            set ;
+        }
+
+		<#}#>
+
+		#endregion
+
+		#region Factory Methods
+
+		public static <#= ClassName #> Create()
+        {
+            return EF.DataPortal.Create<<#= ClassName #>>();
+        }
+
+		public static <#= ClassName #> Fetch(System.Linq.Expressions.Expression<Func<<#= ClassName #>, bool>> exp,params object[] values)
+        {
+			LambdaExpression lambda = LambdaExpression.Create<<#= ClassName #>>(exp,values);
+            return EF.DataPortal.Fetch<<#= ClassName #>>(lambda);
+        }
+
+		#endregion
+
+	}
+
+	[Serializable]
+    [<#=Factory#>(typeof(<#= ClassName #>s))]
+#if Dev
+    [RunLocal]
+#endif
+	
+	public class <#= ClassName #>s:ReadOnlyListBase<<#= ClassName #>s,<#= ClassName #>>
+    {
+        #region Factory Methods
+
+        public static <#= ClassName #>s Fetch()
+        {
+            return EF.DataPortal.Fetch<<#= ClassName #>s>();
+        }
+
+		public static <#=ClassName#>s Fetch(System.Linq.Expressions.Expression<Func<<#= ClassName #>, bool>> exp,params object[] values)
+		{
+			LambdaExpression lambda = LambdaExpression.Create<<#= ClassName #>>(exp,values);
+            return EF.DataPortal.Fetch<<#= ClassName #>s>(lambda);
+		}
+
+		public static <#=ClassName#>s Fetch(int page, int rowCount)
+        {
+            return EF.DataPortal.Fetch<<#=ClassName#>s>(new Paging { Page=page,RowCount=rowCount});
+        }
+
+        public static <#=ClassName#>s Fetch(int page, int rowCount, System.Linq.Expressions.Expression<Func<<#=ClassName#>, bool>> exp,params object[] values)
+        {
+            return EF.DataPortal.Fetch<<#=ClassName#>s>(new PagigExpress { Page=page,RowCount=rowCount,Lambda=LambdaExpression.Create<<#=ClassName#>>(exp,values)});
+        }
+
+        #endregion
+
+		[Serializable]
+        public class Paging
+        {
+            public int Page { get; set; }
+            public int RowCount { get; set; }
+            public int StartIndex
+            {
+                get 
+                {
+                    if (Page >= 0 && RowCount > 0)
+                    {
+                        return Page * RowCount;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        [Serializable]
+        public class PagigExpress
+        {
+            public int Page { get; set; }
+            public int RowCount { get; set; }
+            public int StartIndex
+            {
+                get
+                {
+                    if (Page >= 0 && RowCount > 0)
+                    {
+                        return Page * RowCount;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            }
+            public LambdaExpression Lambda { get; set; }
+        }
+
+    }
+}

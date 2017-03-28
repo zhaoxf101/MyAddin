@@ -1,0 +1,43 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="T4Attribute.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace= "T4Attribute" #>
+<#@ parameter type="System.Object" name="model" #>
+<#@ output extension=".cs" #>
+<#
+    
+    T4ClassAttribute  ModelAttribute =(T4ClassAttribute)model.GetType().GetCustomAttributes(typeof(T4ClassAttribute), false).FirstOrDefault();
+ #>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace <#=        model.GetType().Namespace#>
+{
+
+ /// <summary>
+    ///  创建人:<#=        ModelAttribute.Author #>
+    /// </summary>
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+ <#    foreach ( var item in  model.GetType().GetProperties())  
+    {     
+        if(((T4PropertyAttribute)item.GetCustomAttributes(typeof(T4PropertyAttribute), false).FirstOrDefault()).IsOutput){
+ #>
+        Console.WriteLine("<#= ((T4PropertyAttribute)item.GetCustomAttributes(typeof(T4PropertyAttribute), false).FirstOrDefault()).DisplayName#>");
+
+<#    }} #>
+          
+            Console.ReadLine();
+        }
+    }
+}

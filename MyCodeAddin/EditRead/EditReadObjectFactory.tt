@@ -1,0 +1,433 @@
+﻿<#@ template language="C#" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using EF;
+using EF.Data;
+using EF.Linq;
+using EF.Server;
+using EFramework.DalLinq;
+
+namespace <#= DalNameSpace #>
+{
+	public class <#= ClassName #>Factory:<#= BusNameSpace #>.<#= ClassName #>
+    {
+        public static <#= BusNameSpace #>.<#= ClassName #> Fetch(<#= TableName #> data)
+        {
+            <#= BusNameSpace #>.<#= ClassName #> item = (<#= BusNameSpace #>.<#= ClassName #>)Activator.CreateInstance(typeof(<#= BusNameSpace #>.<#= ClassName #>));
+            using (ObjectFactory.BypassPropertyChecks(item))
+            {
+				<#foreach(var item in Items)
+				{#>
+                item.<#= item.Name #> = data.<#= item.Name #>;
+				<#}#>
+			}
+			ObjectFactory.MarkAsChild(item);
+            ObjectFactory.MarkOld(item);
+            return item;
+        }
+
+		private void DataPortal_Fetch(<#= BusNameSpace #>.LambdaExpression lambda)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+				var exp = lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select p).SingleOrDefault();
+                if (i != null)
+                {
+					<#foreach(var item in Items)
+					{#>
+					this.<#= item.Name #> = i.<#= item.Name #>;
+					<#}#>}
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        protected override void DataPortal_Insert()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.Insert<<#= TableName #>>(p => new <#= TableName #> {
+						<# foreach(var item in Items)
+						{  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+					});
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("插入了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,data.<#=KeyItems[i].Name#><#;}#>));
+            }
+            
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void Chlid_Insert()
+        {
+			 using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.Insert<<#= TableName #>>(p => new <#= TableName #> {
+						<# foreach(var item in Items)
+						{  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+					});
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("插入了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,data.<#=KeyItems[i].Name#><#;}#>));
+            }
+		}
+
+		<# if(KeyItems.Count==1)
+		{ 
+		#>
+
+		private void DataPortal_Fetch(string code)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = (from p in ctx.DataContext.<#= TableName #>
+                         where  p.<#=KeyItems[0].Name #>==code
+                         select p).SingleOrDefault();
+                if (i != null)
+                {
+					<#foreach(var item in Items)
+					{#>
+					this.<#= item.Name #> = i.<#= item.Name #>;
+				  <#}#>
+				}
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void DataPortal_Delete(string code)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                using (BypassPropertyChecks)
+                {
+                    ctx.DataContext.DeleteByPK<<#= TableName #>>(code);
+                }
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("删除了表<#= TableName #>的数据{0}",code));
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void Child_DeleteSelf()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                using (BypassPropertyChecks)
+                {
+                    ctx.DataContext.DeleteByPK<<#= TableName #>>(this.<#= KeyItems[0].Name #>);
+                }
+            }
+            EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("删除了表<#= TableName #>的数据{0}",this.<#= KeyItems[0].Name #>));
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        protected override void DataPortal_Update()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.UpdateByPK<<#= TableName #>>(p => new <#= TableName #>
+                {
+						<# foreach(var item in NoKeyItems){  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+				},
+                data.<#= KeyItems[0].Name #>
+                );
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("更新了表<#= TableName #>的数据{0}",data.<#= KeyItems[0].Name #>));
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void Child_Update()
+        {
+			using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.UpdateByPK<<#= TableName #>>(p => new <#= TableName #>
+                {
+						<# foreach(var item in NoKeyItems){  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+				},
+                data.<#= KeyItems[0].Name #>
+                );
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("更新了表<#= TableName #>的数据{0}",data.<#= KeyItems[0].Name #>));
+            }	
+		}
+
+		<# } #>
+		
+		<# if(KeyItems.Count>1) {#>
+
+		private void DataPortal_Fetch(<#= BusNameSpace #>.<#= ClassName #>.Criteria info)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = (from p in ctx.DataContext.<#= TableName #>
+                         where <# for(int i=0;i<KeyItems.Count;i++){if(i==0){#>p.<#=KeyItems[i].Name #>==info.<#=KeyItems[i].Name #><#}else{#>&&p.<#=KeyItems[i].Name #>==info.<#=KeyItems[i].Name #>
+						 <#}}#>
+					select p).SingleOrDefault();
+                if (i != null)
+                {
+					<#foreach(var item in Items)
+					{#>
+					this.<#= item.Name #> = i.<#= item.Name #>;
+				  <#}#>
+				}
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void DataPortal_Delete(<#= BusNameSpace #>.<#= ClassName #>.Criteria info)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                using (BypassPropertyChecks)
+                {
+                    ctx.DataContext.DeleteByPK<<#= TableName #>>(new 
+					{
+						<# foreach(var item in KeyItems)
+						{#>
+						<#= item.Name #> = info.<#= item.Name #>,
+						<#}#>
+					});
+                }
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("删除了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,info.<#=KeyItems[i].Name#><#;}#>));
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void Child_DeleteSelf()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                using (BypassPropertyChecks)
+                {
+                    ctx.DataContext.DeleteByPK<<#= TableName #>>(new {<#= KeyItems[0].Name #>=this.<#= KeyItems[0].Name #><#for(int i=1;i<KeyItems.Count;i++){#>,<#=KeyItems[i].Name#>=this.<#=KeyItems[i].Name#><#;}#>});
+                }
+            }
+            EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("删除了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,this.<#=KeyItems[i].Name#><#;}#>));
+        }
+
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        protected override void DataPortal_Update()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.UpdateByPK<<#= TableName #>>(p => new <#= TableName #>
+                {
+						<# foreach(var item in NoKeyItems){  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+				},new {
+				<# foreach(var item in KeyItems)
+				{ #>
+                <#= item.Name #>=data.<#= item.Name #>,
+				<#}#>
+				});
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("更新了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,this.<#=KeyItems[i].Name#><#;}#>));
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void Child_Update()
+		{
+			using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                <#= BusNameSpace #>.<#= ClassName #> data = this;
+                ctx.DataContext.UpdateByPK<<#= TableName #>>(p => new <#= TableName #>
+                {
+						<# foreach(var item in NoKeyItems){  if(item.Name=="ChangedUser"){#>
+							<#=item.Name#>=ApplicationContext.User.Identity.Name,
+						<#;}else if(item.Name=="CreatedUser"){#>
+						<#;}else if(item.Name=="ChangedDate"){#>
+							<#=item.Name#>=System.DateTime.Now,
+						<#;}else if(item.Name=="CreatedDate"){#>
+						<#;}else {#>
+							<#= item.Name #> = data.<#= item.Name #>,
+						<#;}}#>
+				},new {
+				<# foreach(var item in KeyItems)
+				{ #>
+                <#= item.Name #>=data.<#= item.Name #>,
+				<#}#>
+				});
+				EF.Log.Logger.Trace(EF.Log.TraceLevel.Info, string.Format("更新了表<#= TableName #>的数据<#for(int i=0;i<KeyItems.Count;i++){#><#=KeyItems[i].Name#>={<#=i#>};<#;}#>"<#for(int i=0;i<KeyItems.Count;i++){#>,this.<#=KeyItems[i].Name#><#;}#>));
+            }
+		}
+
+		<# } #>
+
+
+	}
+
+
+	public class <#= ClassName #>Factory:<#= BusNameSpace #>.<#= ClassName #>
+    {
+        public static <#= BusNameSpace #>.<#= ClassName #> Fetch(<#= TableName #> data)
+        {
+            <#= BusNameSpace #>.<#= ClassName #> item = (<#= BusNameSpace #>.<#= ClassName #>)Activator.CreateInstance(typeof(<#= BusNameSpace #>.<#= ClassName #>));
+            //using (ObjectFactory.BypassPropertyChecks(item))
+            {
+				<#foreach(var item in Items)
+				{#>
+                item.<#= item.Name #> = data.<#= item.Name #>;
+				<#}#>
+			}
+			ObjectFactory.MarkAsChild(item);
+            ObjectFactory.MarkOld(item);
+            return item;
+        }
+
+		private void DataPortal_Fetch(<#= BusNameSpace #>.LambdaExpression lambda)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+				var exp = lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select p).FirstOrDefault();
+                if (i != null)
+                {
+					<#foreach(var item in Items)
+					{#>
+					this.<#= item.Name #> = i.<#= item.Name #>;
+					<#}#>}
+            }
+        }
+	}
+
+	public class <#= ClassName #>sFactory : <#= BusNameSpace #>.<#= ClassName #>s
+    {
+        private void DataPortal_Fetch()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		private void DataPortal_Fetch(Paging page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = (from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+        private void DataPortal_Fetch(PagigExpress page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var exp = page.Lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void DataPortal_Update()
+        {
+            this.Child_Update();
+        }
+
+    }
+
+	public class <#= ClassName #>sFactory : <#= BusNameSpace #>.<#= ClassName #>s
+    {
+        private void DataPortal_Fetch()
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		private void DataPortal_Fetch(Paging page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var i = (from p in ctx.DataContext.<#= TableName #>
+                        select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+        private void DataPortal_Fetch(PagigExpress page)
+        {
+            using (var ctx = ContextManager<EFDataContext>.GetManager(Database.EFramework))
+            {
+                var exp = page.Lambda.Resolve<<#= TableName #>>();
+                var i = (from p in ctx.DataContext.<#= TableName #>.Where(exp)
+                         select <#= ClassName #>Factory.Fetch(p)).Skip(page.StartIndex).Take(page.RowCount);
+                this.RaiseListChangedEvents = false;
+                this.AddRange(i);
+                this.RaiseListChangedEvents = true;
+            }
+        }
+
+		[Transactional(TransactionalTypes.TransactionScope)]
+        private void DataPortal_Update()
+        {
+            this.Child_Update();
+        }
+
+    }
+}
